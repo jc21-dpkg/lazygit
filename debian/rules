@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+%:
+	dh $@
+
+
+# Vars
+PWD=$(shell pwd)
+PACKAGE=$(shell cat ../dpkg.json | jq -r ".PACKAGE")
+VERSION=$(shell cat ../dpkg.json | jq -r ".VERSION")
+GH_USER=$(shell cat ../dpkg.json | jq -r ".GH_USER")
+COMMIT=$(shell cat ../dpkg.json | jq -r ".COMMIT")
+DATE=$(shell date -u +%Y%m%d.%H%M%S)
+# Go parameters
+GOCMD=go
+GOBUILD=$(GOCMD) build
+GOCLEAN=$(GOCMD) clean
+GOGET=$(GOCMD) get
+
+all: build
+
+build:
+	go get -u github.com/golang/dep/cmd/dep
+	mkdir -p $(GOPATH)/src/github.com/$(GH_USER)
+	ln -snf $(PWD) $(GOPATH)/src/github.com/$(GH_USER)/$(PACKAGE)
+	cd $(GOPATH)/src/github.com/$(GH_USER)/$(PACKAGE) && \
+		$(GOPATH)/bin/dep ensure && \
+		$(GOBUILD) -o bin/$(PACKAGE) -v -ldflags "-X main.date=$(DATE) -X main.commit=$(COMMIT) -X main.version=$(VERSION)"
+
+clean:
+	$(GOCLEAN)
+	rm -f $(PACKAGE)
+
+deps:
+	$(GOGET)
