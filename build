@@ -98,7 +98,7 @@ docker run --rm \
     sudo chown -R builder:builder /home/builder/package /home/builder/.gnupg
 
 # Build
-echo -e "${BLUE}❯ ${YELLOW}Building Part 1${RESET}"
+echo -e "${BLUE}❯ ${YELLOW}Building${RESET}"
 set +e
 
 # Docker Run Part 1
@@ -109,25 +109,9 @@ docker run --rm \
     -e "GOPROXY=${GOPROXY}" \
     -w "/home/builder/package/${PACKAGE}-${VERSION}" \
     "${DOCKER_IMAGE}:${DOCKER_TAG}" \
-    sudo mk-build-deps --install --tool='apt-get --no-install-recommends -y' debian/control
+    bash -c "sudo mk-build-deps --install --tool='apt-get --no-install-recommends -y' debian/control && dpkg-buildpackage --sign-key="${SIGN_KEY}" --force-sign"
 
 BUILD_SUCCESS=$?
-
-# Docker Run Part 2
-if [ $BUILD_SUCCESS -eq 0 ]; then
-    echo -e "${BLUE}❯ ${YELLOW}Building Part 2${RESET}"
-    docker run --rm \
-        --name "dpkgbuild-${BUILD_TAG:-dpkg-${DISTRO}-${PACKAGE}}" \
-        -v "${CWD}:/home/builder/package" \
-        -v "${CWD}/sign/.gnupg:/home/builder/.gnupg" \
-        -e "GOPROXY=${GOPROXY}" \
-        -e "DPKG_COLORS=always" \
-        -w "/home/builder/package/${PACKAGE}-${VERSION}" \
-        "${DOCKER_IMAGE}:${DOCKER_TAG}" \
-        dpkg-buildpackage --sign-key="${SIGN_KEY}" --force-sign
-
-    BUILD_SUCCESS=$?
-fi
 
 # Change ownership back
 echo -e "${BLUE}❯ ${YELLOW}Reverting ownership${RESET}"
