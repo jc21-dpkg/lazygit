@@ -1,9 +1,9 @@
 {
 	"PACKAGE": "lazygit",
-	"VERSION": "0.12.3",
+	"VERSION": "0.13.0",
 	"GH_USER": "jesseduffield",
-	"GH_VERSION": "0.12.3",
-	"COMMIT": "79e696d8a747edc3bf1b9ddbd8dcd5038ec7d7ba",
+	"GH_VERSION": "0.13",
+	"COMMIT": "d647a96ed55e134f1464878be8d0be3a464d996f",
 	"URL": "https://github.com/${GH_USER}/${PACKAGE}/archive/v${GH_VERSION}.tar.gz",
 	"SIGN_KEY": "EFD591B218E19AE3376D80D14F9E050D1DFFBB86",
 	"publish": {
