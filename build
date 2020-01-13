@@ -79,7 +79,18 @@ fi
 
 # Extract
 echo -e "${BLUE}❯ ${YELLOW}Extracting${RESET}"
-tar xzf "${PACKAGE}_${VERSION}.orig.tar.gz"
+tar -xzf "${PACKAGE}_${VERSION}.orig.tar.gz"
+
+# If stupid github versioning:
+if [[ "${GH_VERSION}" != "${VERSION}" ]]; then
+    mv "${PACKAGE}-${GH_VERSION}" "${PACKAGE}-${VERSION}"
+fi
+
+# Double check folder existence
+if ! [ -d "${PACKAGE}-${VERSION}" ]; then
+    echo -e "${BLUE}❯ ${RED}Error: expecting folder \`${PACKAGE}-${VERSION}\` to exist${RESET}"
+    exit 1
+fi
 
 # Copy over debian package info
 echo -e "${BLUE}❯ ${YELLOW}Setting up ./debian folder${RESET}"
